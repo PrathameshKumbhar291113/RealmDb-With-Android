@@ -1,5 +1,8 @@
 package com.realmtutorial.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.realmtutorial.RealmTutorialApplication
@@ -31,8 +34,19 @@ class MainViewModel : ViewModel() {
             emptyList()
         )
 
+    var courseDetails: Course? by mutableStateOf(null)
+        private set
+
     init {
 //        createSampleEntries()
+    }
+
+    fun showCourseDetails(course: Course) {
+        courseDetails = course
+    }
+
+    fun hideCourseDetails(){
+        courseDetails = null
     }
 
     private fun createSampleEntries() {
@@ -161,4 +175,17 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
+    fun deleteCourse() {
+        viewModelScope.launch {
+            realm.write {
+                val course = courseDetails ?: return@write
+                val latestCourse = findLatest(course) ?: return@write
+                delete(latestCourse)
+
+                courseDetails = null
+            }
+        }
+    }
+
 }
